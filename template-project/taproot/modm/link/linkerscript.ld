@@ -14,28 +14,16 @@
 
 MEMORY
 {
-	FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 2097152
-	CCM (rw) : ORIGIN = 0x10000000, LENGTH = 65536
-	SRAM1 (rwx) : ORIGIN = 0x20000000, LENGTH = 114688
-	SRAM2 (rwx) : ORIGIN = 0x2001C000, LENGTH = 16384
-	SRAM3 (rwx) : ORIGIN = 0x20020000, LENGTH = 65536
-	BACKUP (rwx) : ORIGIN = 0x40024000, LENGTH = 4096
-	CONT_SRAM1 (rwx) : ORIGIN = 0x20000000, LENGTH = 196608
+	FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 524288
+	SRAM1 (rwx) : ORIGIN = 0x20000000, LENGTH = 131072
+	CONT_SRAM1 (rwx) : ORIGIN = 0x20000000, LENGTH = 131072
     
 }
 
 __flash_start = ORIGIN(FLASH);
 __flash_end = ORIGIN(FLASH) + LENGTH(FLASH);
-__ccm_start = ORIGIN(CCM);
-__ccm_end = ORIGIN(CCM) + LENGTH(CCM);
 __sram1_start = ORIGIN(SRAM1);
 __sram1_end = ORIGIN(SRAM1) + LENGTH(SRAM1);
-__sram2_start = ORIGIN(SRAM2);
-__sram2_end = ORIGIN(SRAM2) + LENGTH(SRAM2);
-__sram3_start = ORIGIN(SRAM3);
-__sram3_end = ORIGIN(SRAM3) + LENGTH(SRAM3);
-__backup_start = ORIGIN(BACKUP);
-__backup_end = ORIGIN(BACKUP) + LENGTH(BACKUP);
 OUTPUT_FORMAT("elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(Reset_Handler)
@@ -45,6 +33,7 @@ MAIN_STACK_SIZE    = 3072;
 PROCESS_STACK_SIZE = 0;
 TOTAL_STACK_SIZE   = MAIN_STACK_SIZE + PROCESS_STACK_SIZE;
 
+__vec_offset = TOTAL_STACK_SIZE;
 SECTIONS
 {
 	__rom_start = ORIGIN(FLASH);
@@ -103,6 +92,23 @@ SECTIONS
 
 
 
+	.stack (NOLOAD) :
+	{
+		. = __vec_offset - TOTAL_STACK_SIZE;
+		__stack_start = .;
+
+		. += MAIN_STACK_SIZE;
+		. = ALIGN(8);
+		__main_stack_top = .;
+
+		. += PROCESS_STACK_SIZE;
+		. = ALIGN(8);
+		__process_stack_top = .;
+
+		__stack_end = .;
+	} >CONT_SRAM1
+
+
 	.data :
 	{
 		. = ALIGN(4);
@@ -112,6 +118,14 @@ SECTIONS
 		. = ALIGN(4);
 	} >CONT_SRAM1 AT >FLASH
 
+	.fastdata :
+	{
+		__fastdata_load = LOADADDR(.fastdata);
+		__fastdata_start = .;
+		*(.fastdata .fastdata.*)
+		. = ALIGN(4);
+		__fastdata_end = .;
+	} >CONT_SRAM1 AT >FLASH
 	.fastcode :
 	{
 		__fastcode_load = LOADADDR(.fastcode);
@@ -172,172 +186,6 @@ SECTIONS
 		__heap_sram1_end = .;
 	} >CONT_SRAM1
 
-	.data_sram2 :
-	{
-		. = ALIGN(4);
-		__data_sram2_load = LOADADDR(.data_sram2);
-		__data_sram2_start = .;
-		*(.data_sram2 .data_sram2.*)
-		. = ALIGN(4);
-	} >CONT_SRAM1 AT >FLASH
-
-	__data_sram2_end = .;
-
-	.bss_sram2 (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__bss_sram2_start = .;
-		*(.bss_sram2 .bss_sram2.*)
-		. = ALIGN(4);
-		__bss_sram2_end = .;
-	} >CONT_SRAM1
-	.noinit_sram2 (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__noinit_sram2_start = .;
-		*(.noinit_sram2 .noinit_sram2.*)
-		. = ALIGN(4);
-		__noinit_sram2_end = .;
-	} >CONT_SRAM1
-	.heap_sram2 (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__heap_sram2_start = .;
-		. = MAX(ABSOLUTE(.), ORIGIN(SRAM2) + LENGTH(SRAM2));
-		__heap_sram2_end = .;
-	} >CONT_SRAM1
-
-	.data_sram3 :
-	{
-		. = ALIGN(4);
-		__data_sram3_load = LOADADDR(.data_sram3);
-		__data_sram3_start = .;
-		*(.data_sram3 .data_sram3.*)
-		. = ALIGN(4);
-	} >CONT_SRAM1 AT >FLASH
-
-	__data_sram3_end = .;
-
-	.bss_sram3 (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__bss_sram3_start = .;
-		*(.bss_sram3 .bss_sram3.*)
-		. = ALIGN(4);
-		__bss_sram3_end = .;
-	} >CONT_SRAM1
-	.noinit_sram3 (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__noinit_sram3_start = .;
-		*(.noinit_sram3 .noinit_sram3.*)
-		. = ALIGN(4);
-		__noinit_sram3_end = .;
-	} >CONT_SRAM1
-	.heap_sram3 (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__heap_sram3_start = .;
-		. = MAX(ABSOLUTE(.), ORIGIN(SRAM3) + LENGTH(SRAM3));
-		__heap_sram3_end = .;
-	} >CONT_SRAM1
-
-
-
-
-	.data_backup :
-	{
-		. = ALIGN(4);
-		__data_backup_load = LOADADDR(.data_backup);
-		__data_backup_start = .;
-		*(.data_backup .data_backup.*)
-		. = ALIGN(4);
-	} >BACKUP AT >FLASH
-
-	__data_backup_end = .;
-
-	.bss_backup (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__bss_backup_start = .;
-		*(.bss_backup .bss_backup.*)
-		. = ALIGN(4);
-		__bss_backup_end = .;
-	} >BACKUP
-	.noinit_backup (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__noinit_backup_start = .;
-		*(.noinit_backup .noinit_backup.*)
-		. = ALIGN(4);
-		__noinit_backup_end = .;
-	} >BACKUP
-	.heap_backup (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__heap_backup_start = .;
-		. = MAX(ABSOLUTE(.), ORIGIN(BACKUP) + LENGTH(BACKUP));
-		__heap_backup_end = .;
-	} >BACKUP
-
-	.stack (NOLOAD) :
-	{
-		__stack_start = .;
-
-		. += MAIN_STACK_SIZE;
-		. = ALIGN(8);
-		__main_stack_top = .;
-
-		. += PROCESS_STACK_SIZE;
-		. = ALIGN(8);
-		__process_stack_top = .;
-
-		__stack_end = .;
-	} >CCM
-
-
-	/* CCM can only be accessed by D-Bus, do not place .fastcode here! */
-	.fastdata :
-	{
-		. = ALIGN(4);
-		__fastdata_load = LOADADDR(.fastdata);
-		__fastdata_start = .;
-		*(.fastdata .fastdata.*)
-		. = ALIGN(4);
-	} >CCM AT >FLASH
-
-	.data_ccm :
-	{
-		__data_ccm_start = .;
-		*(.data_ccm .data_ccm.*)
-		. = ALIGN(4);
-		__data_ccm_end = .;
-	} >CCM AT >FLASH
-	__fastdata_end = .;
-
-	.bss_ccm (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__bss_ccm_start = .;
-		*(.bss_ccm .bss_ccm.*)
-		. = ALIGN(4);
-		__bss_ccm_end = .;
-	} >CCM
-	.noinit_ccm (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__noinit_ccm_start = .;
-		*(.noinit_ccm .noinit_ccm.*)
-		. = ALIGN(4);
-		__noinit_ccm_end = .;
-	} >CCM
-	.heap_ccm (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__heap_ccm_start = .;
-		. = MAX(ABSOLUTE(.), ORIGIN(CCM) + LENGTH(CCM));
-		__heap_ccm_end = .;
-	} >CCM
 
     
 
@@ -348,32 +196,12 @@ SECTIONS
 		__table_zero_intern_start = .;
 		LONG(__bss_start)
 		LONG(__bss_end)
-		LONG(__bss_sram2_start)
-		LONG(__bss_sram2_end)
-		LONG(__bss_sram3_start)
-		LONG(__bss_sram3_end)
-		LONG(__bss_backup_start)
-		LONG(__bss_backup_end)
-		LONG(__bss_ccm_start)
-		LONG(__bss_ccm_end)
 		__table_zero_intern_end = .;
 
 		__table_copy_intern_start = .;
 		LONG(__data_load)
 		LONG(__data_start)
 		LONG(__data_end)
-		LONG(__data_sram2_load)
-		LONG(__data_sram2_start)
-		LONG(__data_sram2_end)
-		LONG(__data_sram3_load)
-		LONG(__data_sram3_start)
-		LONG(__data_sram3_end)
-		LONG(__data_backup_load)
-		LONG(__data_backup_start)
-		LONG(__data_backup_end)
-		LONG(__fastdata_load)
-		LONG(__fastdata_start)
-		LONG(__fastdata_end)
 		__table_copy_intern_end = .;
 
 		__table_zero_extern_start = .;
@@ -401,18 +229,6 @@ SECTIONS
 		LONG(0x001f)
 		LONG(__heap_sram1_start)
 		LONG(__heap_sram1_end)
-		LONG(0x001f)
-		LONG(__heap_sram2_start)
-		LONG(__heap_sram2_end)
-		LONG(0x001f)
-		LONG(__heap_sram3_start)
-		LONG(__heap_sram3_end)
-		LONG(0x4009)
-		LONG(__heap_backup_start)
-		LONG(__heap_backup_end)
-		LONG(0x2002)
-		LONG(__heap_ccm_start)
-		LONG(__heap_ccm_end)
         
 		__table_heap_end = .;
 

@@ -163,6 +163,8 @@ public:
 	/// @{
 	/// Connect to any software peripheral
 	using BitBang = GpioSignal;
+	/// Connect to Quadspi
+	using Bk1io1 = GpioSignal;
 	/// Connect to I2s3
 	using Ck = GpioSignal;
 	/// Connect to Sdio
@@ -181,6 +183,12 @@ public:
 		static_assert(
 			(peripheral == Peripheral::BitBang),
 			"GpioC10::BitBang only connects to software drivers!");
+	};
+	template< Peripheral peripheral >
+	struct Bk1io1 { static void connect();
+		static_assert(
+			(peripheral == Peripheral::Quadspi),
+			"GpioC10::Bk1io1 only connects to Quadspi!");
 	};
 	template< Peripheral peripheral >
 	struct Ck { static void connect();
@@ -229,6 +237,18 @@ struct GpioC10::BitBang<Peripheral::BitBang>
 	static constexpr Gpio::Signal Signal = Gpio::Signal::BitBang;
 	static constexpr int af = -1;
 	inline static void connect() {}
+};
+template<>
+struct GpioC10::Bk1io1<Peripheral::Quadspi>
+{
+	using Gpio = GpioC10;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Bk1io1;
+	static constexpr int af = 9;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(9);
+	}
 };
 template<>
 struct GpioC10::Ck<Peripheral::I2s3>

@@ -44,25 +44,12 @@ public:
     mockable ~Leds() = default;
 
     /**
-     * The LED letters correspond to the letters written next to the LEDs
-     * on the RoboMaster type A board. The `Green` LED is the led next
-     * to the button (opposite from the 8 LEDs labeled by letters).  The
-     * `Red` LED is the led directly adjacent to the `Green` LED. A third
-     * red LED is triggered when you supply 24V to the board and is not
-     * controllable.
+     * The LED corresponds to the built-in LED (LD2) on the Nucleo-F446RE board.
+     * - Green LED (LD2) is connected to PA5 (Arduino D13)
      */
     enum LedPin
     {
-        A = 0,
-        B,
-        C,
-        D,
-        E,
-        F,
-        G,
-        H,
-        Green,
-        Red
+        Green,  // LD2 on PA5
     };
 
     /**

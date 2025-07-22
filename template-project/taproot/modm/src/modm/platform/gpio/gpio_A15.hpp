@@ -163,6 +163,8 @@ public:
 	/// @{
 	/// Connect to any software peripheral
 	using BitBang = GpioSignal;
+	/// Connect to Hdmicec
+	using Cec = GpioSignal;
 	/// Connect to Tim2
 	using Ch1 = GpioSignal;
 	/// Connect to Tim2
@@ -171,7 +173,9 @@ public:
 	using Jtdi = GpioSignal;
 	/// Connect to Spi1 or Spi3
 	using Nss = GpioSignal;
-	/// Connect to I2s3
+	/// Connect to Uart4
+	using Rts = GpioSignal;
+	/// Connect to I2s1 or I2s3
 	using Ws = GpioSignal;
 	/// @}
 #endif
@@ -181,6 +185,12 @@ public:
 		static_assert(
 			(peripheral == Peripheral::BitBang),
 			"GpioA15::BitBang only connects to software drivers!");
+	};
+	template< Peripheral peripheral >
+	struct Cec { static void connect();
+		static_assert(
+			(peripheral == Peripheral::Hdmicec),
+			"GpioA15::Cec only connects to Hdmicec!");
 	};
 	template< Peripheral peripheral >
 	struct Ch1 { static void connect();
@@ -208,10 +218,17 @@ public:
 			"GpioA15::Nss only connects to Spi1 or Spi3!");
 	};
 	template< Peripheral peripheral >
+	struct Rts { static void connect();
+		static_assert(
+			(peripheral == Peripheral::Uart4),
+			"GpioA15::Rts only connects to Uart4!");
+	};
+	template< Peripheral peripheral >
 	struct Ws { static void connect();
 		static_assert(
+			(peripheral == Peripheral::I2s1) ||
 			(peripheral == Peripheral::I2s3),
-			"GpioA15::Ws only connects to I2s3!");
+			"GpioA15::Ws only connects to I2s1 or I2s3!");
 	};
 	/// @endcond
 private:
@@ -229,6 +246,18 @@ struct GpioA15::BitBang<Peripheral::BitBang>
 	static constexpr Gpio::Signal Signal = Gpio::Signal::BitBang;
 	static constexpr int af = -1;
 	inline static void connect() {}
+};
+template<>
+struct GpioA15::Cec<Peripheral::Hdmicec>
+{
+	using Gpio = GpioA15;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Cec;
+	static constexpr int af = 4;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(4);
+	}
 };
 template<>
 struct GpioA15::Ch1<Peripheral::Tim2>
@@ -288,6 +317,30 @@ struct GpioA15::Nss<Peripheral::Spi3>
 	connect()
 	{
 		setAlternateFunction(6);
+	}
+};
+template<>
+struct GpioA15::Rts<Peripheral::Uart4>
+{
+	using Gpio = GpioA15;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Rts;
+	static constexpr int af = 8;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(8);
+	}
+};
+template<>
+struct GpioA15::Ws<Peripheral::I2s1>
+{
+	using Gpio = GpioA15;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Ws;
+	static constexpr int af = 5;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(5);
 	}
 };
 template<>

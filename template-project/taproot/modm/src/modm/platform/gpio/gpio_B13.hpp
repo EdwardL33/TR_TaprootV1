@@ -173,8 +173,6 @@ public:
 	using Sck = GpioSignal;
 	/// Connect to Can2
 	using Tx = GpioSignal;
-	/// Connect to Eth
-	using Txd1 = GpioSignal;
 	/// Connect to Usbotghs
 	using Ulpid6 = GpioSignal;
 	/// Connect to Usbotghs
@@ -217,12 +215,6 @@ public:
 		static_assert(
 			(peripheral == Peripheral::Can2),
 			"GpioB13::Tx only connects to Can2!");
-	};
-	template< Peripheral peripheral >
-	struct Txd1 { static void connect();
-		static_assert(
-			(peripheral == Peripheral::Eth),
-			"GpioB13::Txd1 only connects to Eth!");
 	};
 	template< Peripheral peripheral >
 	struct Ulpid6 { static void connect();
@@ -311,18 +303,6 @@ struct GpioB13::Tx<Peripheral::Can2>
 	connect()
 	{
 		setAlternateFunction(9);
-	}
-};
-template<>
-struct GpioB13::Txd1<Peripheral::Eth>
-{
-	using Gpio = GpioB13;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Txd1;
-	static constexpr int af = 11;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(11);
 	}
 };
 template<>

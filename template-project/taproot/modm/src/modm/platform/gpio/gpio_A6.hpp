@@ -169,6 +169,8 @@ public:
 	using Ch1 = GpioSignal;
 	/// Connect to Adc1 or Adc2
 	using In6 = GpioSignal;
+	/// Connect to I2s2
+	using Mck = GpioSignal;
 	/// Connect to Spi1
 	using Miso = GpioSignal;
 	/// Connect to Dcmi
@@ -202,6 +204,12 @@ public:
 			(peripheral == Peripheral::Adc1) ||
 			(peripheral == Peripheral::Adc2),
 			"GpioA6::In6 only connects to Adc1 or Adc2!");
+	};
+	template< Peripheral peripheral >
+	struct Mck { static void connect();
+		static_assert(
+			(peripheral == Peripheral::I2s2),
+			"GpioA6::Mck only connects to I2s2!");
 	};
 	template< Peripheral peripheral >
 	struct Miso { static void connect();
@@ -312,6 +320,18 @@ struct GpioA6::In6<Peripheral::Adc2>
 template<>
 constexpr int8_t
 GpioA6::AdcChannel<Peripheral::Adc2> = 6;
+template<>
+struct GpioA6::Mck<Peripheral::I2s2>
+{
+	using Gpio = GpioA6;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Mck;
+	static constexpr int af = 6;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(6);
+	}
+};
 template<>
 struct GpioA6::Miso<Peripheral::Spi1>
 {

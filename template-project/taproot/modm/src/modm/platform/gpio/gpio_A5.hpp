@@ -167,6 +167,8 @@ public:
 	using Ch1 = GpioSignal;
 	/// Connect to Tim8
 	using Ch1n = GpioSignal;
+	/// Connect to I2s1
+	using Ck = GpioSignal;
 	/// Connect to Tim2
 	using Etr = GpioSignal;
 	/// Connect to Adc1 or Adc2
@@ -197,6 +199,12 @@ public:
 		static_assert(
 			(peripheral == Peripheral::Tim8),
 			"GpioA5::Ch1n only connects to Tim8!");
+	};
+	template< Peripheral peripheral >
+	struct Ck { static void connect();
+		static_assert(
+			(peripheral == Peripheral::I2s1),
+			"GpioA5::Ck only connects to I2s1!");
 	};
 	template< Peripheral peripheral >
 	struct Etr { static void connect();
@@ -268,6 +276,18 @@ struct GpioA5::Ch1n<Peripheral::Tim8>
 	connect()
 	{
 		setAlternateFunction(3);
+	}
+};
+template<>
+struct GpioA5::Ck<Peripheral::I2s1>
+{
+	using Gpio = GpioA5;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Ck;
+	static constexpr int af = 5;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(5);
 	}
 };
 template<>

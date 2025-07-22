@@ -124,6 +124,32 @@ Rcc::enablePll(PllSource source, const PllFactors& pllFactors, uint32_t waitCycl
 }
 
 bool
+Rcc::enablePllSai(const PllSaiFactors& pllFactors, uint32_t waitCycles)
+{
+	// Read reserved values and clear all other values
+	uint32_t tmp = RCC->PLLSAICFGR & ~(
+		RCC_PLLSAICFGR_PLLSAIM |
+		RCC_PLLSAICFGR_PLLSAIN | RCC_PLLSAICFGR_PLLSAIP);
+
+	// PLLSAIM (0) = factor is user defined VCO input frequency must be configured to 2MHz
+	tmp |= ((uint32_t) pllFactors.pllSaiM) & RCC_PLLSAICFGR_PLLSAIM;
+	// PLLSAIN (6) = factor is user defined
+	tmp |= (((uint32_t) pllFactors.pllSaiN) << RCC_PLLSAICFGR_PLLSAIN_Pos) & RCC_PLLSAICFGR_PLLSAIN;
+
+	// PLLSAIP (16) divider for CLK48 frequency; (00: PLLP = 2, 01: PLLP = 4, etc.)
+	tmp |= (((uint32_t) (pllFactors.pllSaiP / 2) - 1) << RCC_PLLCFGR_PLLP_Pos) & RCC_PLLCFGR_PLLP;
+
+	RCC->PLLSAICFGR = tmp;
+
+	// enable pll
+	RCC->CR |= RCC_CR_PLLSAION;
+
+	while (not (tmp = (RCC->CR & RCC_CR_PLLSAIRDY)) and --waitCycles)
+		;
+
+	return tmp;
+}
+bool
 Rcc::enableOverdriveMode(uint32_t waitCycles)
 {
 	PWR->CR |= PWR_CR_ODEN;

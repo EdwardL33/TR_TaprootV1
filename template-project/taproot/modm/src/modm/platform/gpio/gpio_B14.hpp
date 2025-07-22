@@ -169,8 +169,6 @@ public:
 	using Ch2n = GpioSignal;
 	/// Connect to Usbotghs
 	using Dm = GpioSignal;
-	/// Connect to I2s2
-	using Extsd = GpioSignal;
 	/// Connect to Spi2
 	using Miso = GpioSignal;
 	/// Connect to Usart3
@@ -202,12 +200,6 @@ public:
 		static_assert(
 			(peripheral == Peripheral::Usbotghs),
 			"GpioB14::Dm only connects to Usbotghs!");
-	};
-	template< Peripheral peripheral >
-	struct Extsd { static void connect();
-		static_assert(
-			(peripheral == Peripheral::I2s2),
-			"GpioB14::Extsd only connects to I2s2!");
 	};
 	template< Peripheral peripheral >
 	struct Miso { static void connect();
@@ -284,18 +276,6 @@ struct GpioB14::Dm<Peripheral::Usbotghs>
 	connect()
 	{
 		setAlternateFunction(12);
-	}
-};
-template<>
-struct GpioB14::Extsd<Peripheral::I2s2>
-{
-	using Gpio = GpioB14;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Extsd;
-	static constexpr int af = 6;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(6);
 	}
 };
 template<>

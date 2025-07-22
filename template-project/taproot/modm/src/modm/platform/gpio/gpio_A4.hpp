@@ -175,7 +175,7 @@ public:
 	using Out1 = GpioSignal;
 	/// Connect to Usbotghs
 	using Sof = GpioSignal;
-	/// Connect to I2s3
+	/// Connect to I2s1 or I2s3
 	using Ws = GpioSignal;
 	/// @}
 #endif
@@ -227,8 +227,9 @@ public:
 	template< Peripheral peripheral >
 	struct Ws { static void connect();
 		static_assert(
+			(peripheral == Peripheral::I2s1) ||
 			(peripheral == Peripheral::I2s3),
-			"GpioA4::Ws only connects to I2s3!");
+			"GpioA4::Ws only connects to I2s1 or I2s3!");
 	};
 	/// @endcond
 private:
@@ -353,6 +354,18 @@ struct GpioA4::Sof<Peripheral::Usbotghs>
 	connect()
 	{
 		setAlternateFunction(12);
+	}
+};
+template<>
+struct GpioA4::Ws<Peripheral::I2s1>
+{
+	using Gpio = GpioA4;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Ws;
+	static constexpr int af = 5;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(5);
 	}
 };
 template<>

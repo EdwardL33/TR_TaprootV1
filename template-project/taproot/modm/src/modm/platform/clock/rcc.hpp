@@ -116,6 +116,11 @@ public:
 		Div8   = RCC_CFGR_PPRE2_DIV8,
 		Div16  = RCC_CFGR_PPRE2_DIV16
 	};
+	enum class Clock48Source
+	{
+		PllQ = 0,
+		PllSaiP = RCC_DCKCFGR2_CK48MSEL
+	};
 	enum class
 	ClockOutput1Source : uint32_t
 	{
@@ -161,6 +166,12 @@ public:
 		uint8_t pllQ = 0xff;
 	};
 
+	struct PllSaiFactors
+	{
+		const uint8_t pllSaiM;
+		const uint16_t pllSaiN;
+		const uint8_t pllSaiP;
+	};
 	/**
 	 * Enable PLL.
 	 *
@@ -177,6 +188,19 @@ public:
 	static bool
 	enablePll(PllSource source, const PllFactors& pllFactors, uint32_t waitCycles = 2048);
 
+	/**
+	 * Enable PLLSAI.
+	 *
+	 * \warning The PLL source must be selected first by configuring the main PLL.
+	 *
+	 * \param	factors
+	 * 		Struct with all pllsai factors. \see PllSaiFactors.
+	 *
+	 * \param	waitCycles
+	 * 		Number of cycles to wait for the pll to stabilise. Default: 2048.
+	 */
+	static bool
+	enablePllSai(const PllSaiFactors& pllFactors, uint32_t waitCycles = 2048);
 	/**
 	 * Enable PLL.
 	 *
@@ -233,6 +257,11 @@ public:
 	enableWatchdogClock(WatchdogClockSource /*src*/)
 	{ return true; }
 
+	static inline void
+	setClock48Source(Clock48Source source)
+	{
+		RCC->DCKCFGR2 = (RCC->DCKCFGR2 & ~RCC_DCKCFGR2_CK48MSEL) | uint32_t(source);
+	}
 	static inline bool
 	enableClockOutput1(ClockOutput1Source src, uint8_t div)
 	{

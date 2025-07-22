@@ -51,17 +51,8 @@ void Digital::configureInputPullMode(Digital::InputPin pin, Digital::InputPullMo
 #else
     switch (pin)
     {
-        case Digital::InputPin::A:
-            DigitalInPinA::configure(mode);
-            break;
-        case Digital::InputPin::B:
-            DigitalInPinB::configure(mode);
-            break;
-        case Digital::InputPin::C:
-            DigitalInPinC::configure(mode);
-            break;
-        case Digital::InputPin::D:
-            DigitalInPinD::configure(mode);
+        case Digital::InputPin::PB5:
+            DigitalInPinPB5::configure(mode);
             break;
     }
 #endif
@@ -75,20 +66,14 @@ void Digital::set(Digital::OutputPin pin, bool isSet)
 #else
     switch (pin)
     {
-        case Digital::OutputPin::E:
-            DigitalOutPinE::set(isSet);
+        case Digital::OutputPin::LED1:
+            DigitalOutPinLED1::set(isSet);
             break;
-        case Digital::OutputPin::F:
-            DigitalOutPinF::set(isSet);
+        case Digital::OutputPin::LED2:
+            DigitalOutPinLED2::set(isSet);
             break;
-        case Digital::OutputPin::G:
-            DigitalOutPinG::set(isSet);
-            break;
-        case Digital::OutputPin::H:
-            DigitalOutPinH::set(isSet);
-            break;
-        case Digital::OutputPin::Laser:
-            DigitalOutPinLaser::set(isSet);
+        case Digital::OutputPin::LED3:
+            DigitalOutPinLED3::set(isSet);
             break;
     }
 #endif
@@ -102,14 +87,8 @@ bool Digital::read(Digital::InputPin pin) const
 #else
     switch (pin)
     {
-        case Digital::InputPin::A:
-            return DigitalInPinA::read();
-        case Digital::InputPin::B:
-            return DigitalInPinB::read();
-        case Digital::InputPin::C:
-            return DigitalInPinC::read();
-        case Digital::InputPin::D:
-            return DigitalInPinD::read();
+        case Digital::InputPin::PB5:
+            return DigitalInPinPB5::read();
         default:
             return false;
     }

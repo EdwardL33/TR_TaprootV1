@@ -163,16 +163,10 @@ public:
 	/// @{
 	/// Connect to any software peripheral
 	using BitBang = GpioSignal;
-	/// Connect to I2s2
-	using Extsd = GpioSignal;
 	/// Connect to Adc1 or Adc2 or Adc3
 	using In12 = GpioSignal;
 	/// Connect to Spi2
 	using Miso = GpioSignal;
-	/// Connect to Fmc
-	using Sdne0 = GpioSignal;
-	/// Connect to Eth
-	using Txd2 = GpioSignal;
 	/// Connect to Usbotghs
 	using Ulpidir = GpioSignal;
 	/// @}
@@ -183,12 +177,6 @@ public:
 		static_assert(
 			(peripheral == Peripheral::BitBang),
 			"GpioC2::BitBang only connects to software drivers!");
-	};
-	template< Peripheral peripheral >
-	struct Extsd { static void connect();
-		static_assert(
-			(peripheral == Peripheral::I2s2),
-			"GpioC2::Extsd only connects to I2s2!");
 	};
 	template< Peripheral peripheral >
 	struct In12 { static void connect();
@@ -203,18 +191,6 @@ public:
 		static_assert(
 			(peripheral == Peripheral::Spi2),
 			"GpioC2::Miso only connects to Spi2!");
-	};
-	template< Peripheral peripheral >
-	struct Sdne0 { static void connect();
-		static_assert(
-			(peripheral == Peripheral::Fmc),
-			"GpioC2::Sdne0 only connects to Fmc!");
-	};
-	template< Peripheral peripheral >
-	struct Txd2 { static void connect();
-		static_assert(
-			(peripheral == Peripheral::Eth),
-			"GpioC2::Txd2 only connects to Eth!");
 	};
 	template< Peripheral peripheral >
 	struct Ulpidir { static void connect();
@@ -238,18 +214,6 @@ struct GpioC2::BitBang<Peripheral::BitBang>
 	static constexpr Gpio::Signal Signal = Gpio::Signal::BitBang;
 	static constexpr int af = -1;
 	inline static void connect() {}
-};
-template<>
-struct GpioC2::Extsd<Peripheral::I2s2>
-{
-	using Gpio = GpioC2;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Extsd;
-	static constexpr int af = 6;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(6);
-	}
 };
 template<>
 struct GpioC2::In12<Peripheral::Adc1>
@@ -309,30 +273,6 @@ struct GpioC2::Miso<Peripheral::Spi2>
 	connect()
 	{
 		setAlternateFunction(5);
-	}
-};
-template<>
-struct GpioC2::Sdne0<Peripheral::Fmc>
-{
-	using Gpio = GpioC2;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Sdne0;
-	static constexpr int af = 12;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(12);
-	}
-};
-template<>
-struct GpioC2::Txd2<Peripheral::Eth>
-{
-	using Gpio = GpioC2;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Txd2;
-	static constexpr int af = 11;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(11);
 	}
 };
 template<>

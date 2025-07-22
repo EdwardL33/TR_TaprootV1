@@ -56,10 +56,7 @@ public:
      */
     enum InputPin
     {
-        A,
-        B,
-        C,
-        D,
+        PB5,
     };
 
     /**
@@ -67,11 +64,9 @@ public:
      */
     enum OutputPin
     {
-        E,
-        F,
-        G,
-        H,
-        Laser,
+        LED1,
+        LED2,
+        LED3,
     };
 
 #ifdef PLATFORM_HOSTED

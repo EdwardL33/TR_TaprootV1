@@ -15,29 +15,29 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef MODM_STM32_UART_2_HPP
-#define MODM_STM32_UART_2_HPP
+#ifndef MODM_STM32_UART_4_HPP
+#define MODM_STM32_UART_4_HPP
 #include <modm/architecture/interface/uart.hpp>
 #include <modm/platform/gpio/connector.hpp>
 #include "uart_base.hpp"
-#include "uart_hal_2.hpp"
+#include "uart_hal_4.hpp"
 namespace modm::platform
 {
 
 /**
- * Universal asynchronous receiver transmitter (Usart2)
+ * Universal asynchronous receiver transmitter (Uart4)
  *
  * @author		Kevin Laeufer
  * @author		Niklas Hauser
- * @ingroup		modm_platform_uart modm_platform_uart_2
+ * @ingroup		modm_platform_uart modm_platform_uart_4
  */
-class Usart2 : public UartBase, public ::modm::Uart
+class Uart4 : public UartBase, public ::modm::Uart
 {
 public:
-	using Hal = UsartHal2;
+	using Hal = UartHal4;
 	// Expose jinja template parameters to be checked by e.g. drivers or application
-	static constexpr size_t RxBufferSize = 0;
-	static constexpr size_t TxBufferSize = 0;
+	static constexpr size_t RxBufferSize = 256;
+	static constexpr size_t TxBufferSize = 256;
 
 public:
 	template< template<Peripheral _> class... Signals >
@@ -45,12 +45,12 @@ public:
 	connect(Gpio::InputType InputTypeRx = Gpio::InputType::PullUp,
 	        Gpio::OutputType OutputTypeTx = Gpio::OutputType::PushPull)
 	{
-		using Connector = GpioConnector<Peripheral::Usart2, Signals...>;
+		using Connector = GpioConnector<Peripheral::Uart4, Signals...>;
 		using Tx = typename Connector::template GetSignal< Gpio::Signal::Tx >;
 		using Rx = typename Connector::template GetSignal< Gpio::Signal::Rx >;
 		static_assert(((Connector::template IsValid<Tx> and Connector::template IsValid<Rx>) and sizeof...(Signals) == 2) or
 					  ((Connector::template IsValid<Tx> or  Connector::template IsValid<Rx>) and sizeof...(Signals) == 1),
-					  "Usart2::connect() requires one Tx and/or one Rx signal!");
+					  "Uart4::connect() requires one Tx and/or one Rx signal!");
 
 		// Connector::disconnect();
 		Tx::setOutput(OutputTypeTx);
@@ -63,10 +63,12 @@ public:
 	static inline void
 	initialize(Parity parity=Parity::Disabled, WordLength length=WordLength::Bit8)
 	{
-		UsartHal2::initialize<SystemClock, baudrate, tolerance>(parity, length);
-		UsartHal2::setTransmitterEnable(true);
-		UsartHal2::setReceiverEnable(true);
-		UsartHal2::enableOperation();
+		UartHal4::initialize<SystemClock, baudrate, tolerance>(parity, length);
+		UartHal4::enableInterruptVector(true, 12);
+		UartHal4::enableInterrupt(Interrupt::RxNotEmpty);
+		UartHal4::setTransmitterEnable(true);
+		UartHal4::setReceiverEnable(true);
+		UartHal4::enableOperation();
 	}
 
 	static void
@@ -115,4 +117,4 @@ public:
 
 }	// namespace modm::platform
 
-#endif // MODM_STM32_UART_2_HPP
+#endif // MODM_STM32_UART_4_HPP

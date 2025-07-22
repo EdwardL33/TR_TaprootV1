@@ -169,14 +169,10 @@ public:
 	using D10 = GpioSignal;
 	/// Connect to Spi1 or Spi3
 	using Mosi = GpioSignal;
-	/// Connect to Eth
-	using Ppsout = GpioSignal;
 	/// Connect to Can2
 	using Rx = GpioSignal;
-	/// Connect to I2s3
+	/// Connect to I2s1 or I2s3
 	using Sd = GpioSignal;
-	/// Connect to Fmc
-	using Sdcke1 = GpioSignal;
 	/// Connect to I2c1
 	using Smba = GpioSignal;
 	/// Connect to Usbotghs
@@ -210,12 +206,6 @@ public:
 			"GpioB5::Mosi only connects to Spi1 or Spi3!");
 	};
 	template< Peripheral peripheral >
-	struct Ppsout { static void connect();
-		static_assert(
-			(peripheral == Peripheral::Eth),
-			"GpioB5::Ppsout only connects to Eth!");
-	};
-	template< Peripheral peripheral >
 	struct Rx { static void connect();
 		static_assert(
 			(peripheral == Peripheral::Can2),
@@ -224,14 +214,9 @@ public:
 	template< Peripheral peripheral >
 	struct Sd { static void connect();
 		static_assert(
+			(peripheral == Peripheral::I2s1) ||
 			(peripheral == Peripheral::I2s3),
-			"GpioB5::Sd only connects to I2s3!");
-	};
-	template< Peripheral peripheral >
-	struct Sdcke1 { static void connect();
-		static_assert(
-			(peripheral == Peripheral::Fmc),
-			"GpioB5::Sdcke1 only connects to Fmc!");
+			"GpioB5::Sd only connects to I2s1 or I2s3!");
 	};
 	template< Peripheral peripheral >
 	struct Smba { static void connect();
@@ -311,18 +296,6 @@ struct GpioB5::Mosi<Peripheral::Spi3>
 	}
 };
 template<>
-struct GpioB5::Ppsout<Peripheral::Eth>
-{
-	using Gpio = GpioB5;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Ppsout;
-	static constexpr int af = 11;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(11);
-	}
-};
-template<>
 struct GpioB5::Rx<Peripheral::Can2>
 {
 	using Gpio = GpioB5;
@@ -335,6 +308,18 @@ struct GpioB5::Rx<Peripheral::Can2>
 	}
 };
 template<>
+struct GpioB5::Sd<Peripheral::I2s1>
+{
+	using Gpio = GpioB5;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Sd;
+	static constexpr int af = 5;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(5);
+	}
+};
+template<>
 struct GpioB5::Sd<Peripheral::I2s3>
 {
 	using Gpio = GpioB5;
@@ -344,18 +329,6 @@ struct GpioB5::Sd<Peripheral::I2s3>
 	connect()
 	{
 		setAlternateFunction(6);
-	}
-};
-template<>
-struct GpioB5::Sdcke1<Peripheral::Fmc>
-{
-	using Gpio = GpioB5;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Sdcke1;
-	static constexpr int af = 12;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(12);
 	}
 };
 template<>

@@ -165,6 +165,8 @@ public:
 	using BitBang = GpioSignal;
 	/// Connect to Rtc
 	using Af1 = GpioSignal;
+	/// Connect to Sys
+	using Wkup1 = GpioSignal;
 	/// @}
 #endif
 	/// @cond
@@ -179,6 +181,12 @@ public:
 		static_assert(
 			(peripheral == Peripheral::Rtc),
 			"GpioC13::Af1 only connects to Rtc!");
+	};
+	template< Peripheral peripheral >
+	struct Wkup1 { static void connect();
+		static_assert(
+			(peripheral == Peripheral::Sys),
+			"GpioC13::Wkup1 only connects to Sys!");
 	};
 	/// @endcond
 private:
@@ -202,6 +210,17 @@ struct GpioC13::Af1<Peripheral::Rtc>
 {
 	using Gpio = GpioC13;
 	static constexpr Gpio::Signal Signal = Gpio::Signal::Af1;
+	static constexpr int af = -1;
+	inline static void
+	connect()
+	{
+	}
+};
+template<>
+struct GpioC13::Wkup1<Peripheral::Sys>
+{
+	using Gpio = GpioC13;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Wkup1;
 	static constexpr int af = -1;
 	inline static void
 	connect()

@@ -167,8 +167,8 @@ public:
 	using Ch2 = GpioSignal;
 	/// Connect to Tim2 or Tim5
 	using Ch4 = GpioSignal;
-	/// Connect to Eth
-	using Col = GpioSignal;
+	/// Connect to Sai1
+	using Fsa = GpioSignal;
 	/// Connect to Adc1 or Adc2 or Adc3
 	using In3 = GpioSignal;
 	/// Connect to Usart2
@@ -198,10 +198,10 @@ public:
 			"GpioA3::Ch4 only connects to Tim2 or Tim5!");
 	};
 	template< Peripheral peripheral >
-	struct Col { static void connect();
+	struct Fsa { static void connect();
 		static_assert(
-			(peripheral == Peripheral::Eth),
-			"GpioA3::Col only connects to Eth!");
+			(peripheral == Peripheral::Sai1),
+			"GpioA3::Fsa only connects to Sai1!");
 	};
 	template< Peripheral peripheral >
 	struct In3 { static void connect();
@@ -277,15 +277,15 @@ struct GpioA3::Ch4<Peripheral::Tim5>
 	}
 };
 template<>
-struct GpioA3::Col<Peripheral::Eth>
+struct GpioA3::Fsa<Peripheral::Sai1>
 {
 	using Gpio = GpioA3;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Col;
-	static constexpr int af = 11;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Fsa;
+	static constexpr int af = 6;
 	inline static void
 	connect()
 	{
-		setAlternateFunction(11);
+		setAlternateFunction(6);
 	}
 };
 template<>

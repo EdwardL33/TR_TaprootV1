@@ -171,6 +171,10 @@ public:
 	using D0 = GpioSignal;
 	/// Connect to Dcmi
 	using D2 = GpioSignal;
+	/// Connect to Uart5
+	using Rts = GpioSignal;
+	/// Connect to Sys
+	using Traced0 = GpioSignal;
 	/// @}
 #endif
 	/// @cond
@@ -204,6 +208,18 @@ public:
 		static_assert(
 			(peripheral == Peripheral::Dcmi),
 			"GpioC8::D2 only connects to Dcmi!");
+	};
+	template< Peripheral peripheral >
+	struct Rts { static void connect();
+		static_assert(
+			(peripheral == Peripheral::Uart5),
+			"GpioC8::Rts only connects to Uart5!");
+	};
+	template< Peripheral peripheral >
+	struct Traced0 { static void connect();
+		static_assert(
+			(peripheral == Peripheral::Sys),
+			"GpioC8::Traced0 only connects to Sys!");
 	};
 	/// @endcond
 private:
@@ -280,6 +296,30 @@ struct GpioC8::D2<Peripheral::Dcmi>
 	connect()
 	{
 		setAlternateFunction(13);
+	}
+};
+template<>
+struct GpioC8::Rts<Peripheral::Uart5>
+{
+	using Gpio = GpioC8;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Rts;
+	static constexpr int af = 7;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(7);
+	}
+};
+template<>
+struct GpioC8::Traced0<Peripheral::Sys>
+{
+	using Gpio = GpioC8;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Traced0;
+	static constexpr int af = 0;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(0);
 	}
 };
 /// @endcond

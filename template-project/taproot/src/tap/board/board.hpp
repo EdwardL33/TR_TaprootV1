@@ -22,9 +22,10 @@
  */
 
 /*
- * Copyright (c) 2015-2018, Niklas Hauser
+ * Copyright (c) 2016-2018, Niklas Hauser
  * Copyright (c) 2017, Sascha Schade
  * Copyright (c) 2018, Antal Szabó
+ * Copyright (c) 2019 Sebastian Birke
  *
  * This file is part of the modm project.
  *
@@ -46,181 +47,146 @@ using namespace modm::platform;
 #include "modm/math/units.hpp"
 #endif
 
+/// @ingroup modm_board_nucleo_f446re
 namespace Board
 {
-using namespace modm::literals;
+	using namespace modm::literals;
 
-/**
- * STM32F427 running at 180MHz from the external 12MHz crystal
- */
-struct SystemClock
-{
-    static constexpr uint32_t Frequency = 180_MHz;
-    static constexpr uint32_t Apb1 = Frequency / 4;
-    static constexpr uint32_t Apb2 = Frequency / 2;
+/// STM32F446RE running at 180MHz generated from the internal 16MHz crystal
+// Dummy clock for devices
+struct SystemClock {
+	static constexpr uint32_t Frequency = 180_MHz;
+	static constexpr uint32_t Ahb = Frequency;
+	static constexpr uint32_t Apb1 = Frequency / 4;
+	static constexpr uint32_t Apb2 = Frequency / 2;
 
-    static constexpr uint32_t Adc = Apb2;
+	static constexpr uint32_t Adc    = Apb2;
 
-    static constexpr uint32_t Spi1 = Apb2;
-    static constexpr uint32_t Spi2 = Apb1;
-    static constexpr uint32_t Spi3 = Apb1;
-    static constexpr uint32_t Spi4 = Apb2;
-    static constexpr uint32_t Spi5 = Apb2;
-    static constexpr uint32_t Spi6 = Apb2;
+	static constexpr uint32_t Spi1   = Apb2;
+	static constexpr uint32_t Spi2   = Apb1;
+	static constexpr uint32_t Spi3   = Apb1;
+	static constexpr uint32_t Spi4   = Apb2;
+	static constexpr uint32_t Spi5   = Apb2;
 
-    static constexpr uint32_t Usart1 = Apb2;
-    static constexpr uint32_t Usart2 = Apb1;
-    static constexpr uint32_t Usart3 = Apb1;
-    static constexpr uint32_t Uart4 = Apb1;
-    static constexpr uint32_t Uart5 = Apb1;
-    static constexpr uint32_t Usart6 = Apb2;
-    static constexpr uint32_t Uart7 = Apb1;
-    static constexpr uint32_t Uart8 = Apb1;
+	static constexpr uint32_t Usart1 = Apb2;
+	static constexpr uint32_t Usart2 = Apb1;
+	static constexpr uint32_t Usart3 = Apb1;
+	static constexpr uint32_t Uart4  = Apb1;
+	static constexpr uint32_t Uart5  = Apb1;
+	static constexpr uint32_t Usart6 = Apb2;
 
     static constexpr uint32_t Can1 = Apb1;
     static constexpr uint32_t Can2 = Apb1;
 
-    static constexpr uint32_t I2c1 = Apb1;
-    static constexpr uint32_t I2c2 = Apb1;
-    static constexpr uint32_t I2c3 = Apb1;
+	static constexpr uint32_t I2c1   = Apb1;
+	static constexpr uint32_t I2c2   = Apb1;
+	static constexpr uint32_t I2c3   = Apb1;
 
-    static constexpr uint32_t Apb1Timer = 2 * Apb1;
-    static constexpr uint32_t Apb2Timer = 2 * Apb2;
-    static constexpr uint32_t Timer1 = Apb2Timer;
-    static constexpr uint32_t Timer2 = Apb1Timer;
-    static constexpr uint32_t Timer3 = Apb1Timer;
-    static constexpr uint32_t Timer4 = Apb1Timer;
-    static constexpr uint32_t Timer5 = Apb1Timer;
-    static constexpr uint32_t Timer6 = Apb1Timer;
-    static constexpr uint32_t Timer7 = Apb1Timer;
-    static constexpr uint32_t Timer8 = Apb2Timer;
-    static constexpr uint32_t Timer9 = Apb2Timer;
-    static constexpr uint32_t Timer10 = Apb2Timer;
-    static constexpr uint32_t Timer11 = Apb2Timer;
-    static constexpr uint32_t Timer12 = Apb1Timer;
-    static constexpr uint32_t Timer13 = Apb1Timer;
-    static constexpr uint32_t Timer14 = Apb1Timer;
+	static constexpr uint32_t Apb1Timer = Apb1 * 2;
+	static constexpr uint32_t Apb2Timer = Apb2 * 1;
+	static constexpr uint32_t Timer1  = Apb2Timer;
+	static constexpr uint32_t Timer2  = Apb1Timer;
+	static constexpr uint32_t Timer3  = Apb1Timer;
+	static constexpr uint32_t Timer4  = Apb1Timer;
+	static constexpr uint32_t Timer5  = Apb1Timer;
+	static constexpr uint32_t Timer9  = Apb2Timer;
+	static constexpr uint32_t Timer10 = Apb2Timer;
+	static constexpr uint32_t Timer11 = Apb2Timer;
 
-    static bool inline enable()
-    {
+	static bool inline
+	enable()
+	{
 #ifndef PLATFORM_HOSTED
-        Rcc::enableExternalCrystal();  // 8 MHz
-        Rcc::PllFactors pllF = {
-            6,    // 12MHz / M=6 -> 2MHz
-            180,  // 2MHz * N=180 -> 360MHz
-            2     // 360MHz / P=2 -> 180MHz = F_cpu
-        };
-        Rcc::enablePll(Rcc::PllSource::ExternalCrystal, pllF);
-
-        Rcc::setFlashLatency<Frequency>();
-        Rcc::enableSystemClock(Rcc::SystemClockSource::Pll);
-        Rcc::setApb1Prescaler(Rcc::Apb1Prescaler::Div4);
-        Rcc::setApb2Prescaler(Rcc::Apb2Prescaler::Div2);
-        Rcc::updateCoreFrequency<Frequency>();
+		Rcc::enableInternalClock();	// 16MHz
+		const Rcc::PllFactors pllFactors{
+			.pllM = 8,		//  16MHz / M=  8 ->   2MHz
+			.pllN = 180,	//   2MHz * N=180 -> 360MHz
+			.pllP = 2,		// 360MHz / P=  2 -> 180MHz = F_cpu
+		};
+		Rcc::enablePll(Rcc::PllSource::InternalClock, pllFactors);
+		// Required for 180 MHz clock
+		Rcc::enableOverdriveMode();
+		// set flash latency
+		Rcc::setFlashLatency<Frequency>();
+		// switch system clock to PLL output
+		Rcc::enableSystemClock(Rcc::SystemClockSource::Pll);
+		Rcc::setAhbPrescaler(Rcc::AhbPrescaler::Div1);
+		// APB1 has max. 50MHz
+		Rcc::setApb1Prescaler(Rcc::Apb1Prescaler::Div4);
+		Rcc::setApb2Prescaler(Rcc::Apb2Prescaler::Div2);
+		// update frequencies for busy-wait delay functions
+		Rcc::updateCoreFrequency<Frequency>();
 #endif
 
-        return true;
-    }
+		return true;
+	}
 };
 
 #ifndef PLATFORM_HOSTED
+// Arduino Footprint
+// #include "nucleo64_arduino.hpp"
 
-// initialize 9 green Leds and 1 red LED
-// leds 1-8 used for error handling codes
-// led9 used for error handling error (unrepresentable error)
+using Button = GpioInverted<GpioInputC13>;
+using LedD13 = GpioOutputA5;
+using LED1 = GpioOutputC0;
+using LED2 = GpioOutputC1;
+using LED3 = GpioOutputB0;
 
-using LedA = GpioOutputG8;
-using LedB = GpioOutputG7;
-using LedC = GpioOutputG6;
-using LedD = GpioOutputG5;
-using LedE = GpioOutputG4;
-using LedF = GpioOutputG3;
-using LedG = GpioOutputG2;
-using LedH = GpioOutputG1;
-using LedGreen = GpioOutputF14;
-using LedRed = GpioOutputE11;
-using LedsPort = SoftwareGpioPort<LedA, LedB, LedC, LedD, LedE, LedF, LedG, LedH, LedGreen, LedRed>;
-
-// initialize 4 24V outputs
-
-using PowerOut1 = GpioOutputH2;
-using PowerOut2 = GpioOutputH3;
-using PowerOut3 = GpioOutputH4;
-using PowerOut4 = GpioOutputH5;
-using PowerOuts = SoftwareGpioPort<PowerOut1, PowerOut2, PowerOut3, PowerOut4>;
+using LedsPort = SoftwareGpioPort< LedD13,LED1,LED2,LED3 >;
 
 // Initialize analog input pins
         
-using AnalogInPinS = GpioA0;
-using AnalogInPinT = GpioA1;
-using AnalogInPinU = GpioA2;
-using AnalogInPinV = GpioA3;
-using AnalogInPinOledJoystick = GpioA6;
+using AnalogInPinPA6 = GpioA6;
+using AnalogInPinPA7 = GpioA7;
         
-using AnalogInPins = SoftwareGpioPort<AnalogInPinS, AnalogInPinT, AnalogInPinU, AnalogInPinV, AnalogInPinOledJoystick>;
+using AnalogInPins = SoftwareGpioPort<AnalogInPinPA6, AnalogInPinPA7>;
 
-// Initialize PWM pins
-        
-using PWMOutPinW = GpioI5;
-using PWMOutPinX = GpioI6;
-using PWMOutPinY = GpioI7;
-using PWMOutPinZ = GpioI2;
-using PWMOutPinBuzzer = GpioH6;
-using PWMOutPinImuHeater = GpioB5;
-        
-using PWMOutPins = SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinY, PWMOutPinZ, PWMOutPinBuzzer, PWMOutPinImuHeater>;
 
 // Initialize digital input pins
         
-using DigitalInPinA = GpioI0;
-using DigitalInPinB = GpioH12;
-using DigitalInPinC = GpioH11;
-using DigitalInPinD = GpioH10;
+using DigitalInPinPB5 = GpioB5;
         
-using DigitalInPins = SoftwareGpioPort<DigitalInPinA, DigitalInPinB, DigitalInPinC, DigitalInPinD>;
+using DigitalInPins = SoftwareGpioPort<DigitalInPinPB5>;
 
 // Initialize digital output pins
         
-using DigitalOutPinE = GpioD15;
-using DigitalOutPinF = GpioD14;
-using DigitalOutPinG = GpioD13;
-using DigitalOutPinH = GpioD12;
-using DigitalOutPinLaser = GpioG13;
+using DigitalOutPinLED1 = GpioC0;
+using DigitalOutPinLED2 = GpioC1;
+using DigitalOutPinLED3 = GpioB0;
         
-using DigitalOutPins = SoftwareGpioPort<DigitalOutPinE, DigitalOutPinF, DigitalOutPinG, DigitalOutPinH, DigitalOutPinLaser>;
+using DigitalOutPins = SoftwareGpioPort<DigitalOutPinLED1, DigitalOutPinLED2, DigitalOutPinLED3>;
 
 // gpio pins used for SPI communication to the onboard MPU6500 IMU
 
-using ImuSck = GpioF7;
-using ImuMiso = GpioF8;
-using ImuMosi = GpioF9;
-using ImuNss = GpioF6;
-using ImuSpiMaster = SpiMaster5;
 
-using DisplaySck = GpioB3;
-using DisplayMiso = GpioB4;
-using DisplayMosi = GpioA7;
-using DisplayReset = GpioB10;
-using DisplayCommand = GpioB9;
-using DisplaySpiMaster = SpiMaster1;
-
-using I2CSda = GpioF0;
-using I2cScl = GpioF1;
-using I2CMaster = I2cMaster2;
-
-#endif
-
-inline void initialize()
+namespace stlink
 {
-    // init clock
-    SystemClock::enable();
-#ifndef PLATFORM_HOSTED
-    SysTickTimer::initialize<SystemClock>();
-    // init 24V output
-    PowerOuts::setOutput(modm::Gpio::High);
-#endif
+using Rx = GpioInputA3;
+using Tx = GpioOutputA2;
+using Uart = Usart2;
 }
 
-}  // namespace Board
+using LoggerDevice = modm::IODeviceWrapper< stlink::Uart, modm::IOBuffer::BlockIfFull >;
 
-#endif  // TAPROOT_BOARD_HPP_
+#endif
+
+inline void
+initialize()
+{
+	SystemClock::enable();
+#ifndef PLATFORM_HOSTED
+	SysTickTimer::initialize<SystemClock>();
+
+	stlink::Uart::connect<stlink::Tx::Tx, stlink::Rx::Rx>();
+	stlink::Uart::initialize<SystemClock, 115200_Bd>();
+
+	Button::setInput();
+	Button::setInputTrigger(Gpio::InputTrigger::RisingEdge);
+	Button::enableExternalInterrupt();
+#endif
+//	Button::enableExternalInterruptVector(12);
+}
+
+}
+
+#endif	// MODM_STM32_NUCLEO_F446RE_HPP

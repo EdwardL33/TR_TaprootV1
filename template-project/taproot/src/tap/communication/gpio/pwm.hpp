@@ -43,31 +43,16 @@ class Pwm
 {
 public:
 
-    static constexpr uint32_t DEFAULT_TIMER8_FREQUENCY = 2000;
-
-    static constexpr uint32_t DEFAULT_TIMER12_FREQUENCY = 2000;
-
-    static constexpr uint32_t DEFAULT_TIMER3_FREQUENCY = 2000;
-
     Pwm() = default;
     DISALLOW_COPY_AND_ASSIGN(Pwm)
     mockable ~Pwm() = default;
 
     enum Pin
     {
-        W,
-        X,
-        Y,
-        Z,
-        Buzzer,
-        ImuHeater,
     };
 
     enum Timer
     {
-        TIMER8,
-        TIMER12,
-        TIMER3,
     };
 
     mockable void init();
@@ -101,30 +86,8 @@ private:
 
     enum Ch
     {
-        Ch1 = 1,
-        Ch2 = 2,
-        Ch3 = 3,
-        Ch4 = 4,
     };
 
-    /**
-     * Overflow as calculated by the modm Timer8 object in its getPeriod function.
-     * This is what the Auto Reload Register is set to and the pwm duty is scaled to
-     * a value between 0 and this value.
-     */
-    uint16_t timer8CalculatedOverflow;
-    /**
-     * Overflow as calculated by the modm Timer12 object in its getPeriod function.
-     * This is what the Auto Reload Register is set to and the pwm duty is scaled to
-     * a value between 0 and this value.
-     */
-    uint16_t timer12CalculatedOverflow;
-    /**
-     * Overflow as calculated by the modm Timer3 object in its getPeriod function.
-     * This is what the Auto Reload Register is set to and the pwm duty is scaled to
-     * a value between 0 and this value.
-     */
-    uint16_t timer3CalculatedOverflow;
 };  // class Pwm
 
 }  // namespace gpio

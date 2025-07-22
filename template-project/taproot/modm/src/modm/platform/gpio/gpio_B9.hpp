@@ -165,12 +165,16 @@ public:
 	using BitBang = GpioSignal;
 	/// Connect to Tim11
 	using Ch1 = GpioSignal;
+	/// Connect to Tim2
+	using Ch2 = GpioSignal;
 	/// Connect to Tim4
 	using Ch4 = GpioSignal;
 	/// Connect to Sdio
 	using D5 = GpioSignal;
 	/// Connect to Dcmi
 	using D7 = GpioSignal;
+	/// Connect to Sai1
+	using Fsb = GpioSignal;
 	/// Connect to Spi2
 	using Nss = GpioSignal;
 	/// Connect to I2c1
@@ -195,6 +199,12 @@ public:
 			"GpioB9::Ch1 only connects to Tim11!");
 	};
 	template< Peripheral peripheral >
+	struct Ch2 { static void connect();
+		static_assert(
+			(peripheral == Peripheral::Tim2),
+			"GpioB9::Ch2 only connects to Tim2!");
+	};
+	template< Peripheral peripheral >
 	struct Ch4 { static void connect();
 		static_assert(
 			(peripheral == Peripheral::Tim4),
@@ -211,6 +221,12 @@ public:
 		static_assert(
 			(peripheral == Peripheral::Dcmi),
 			"GpioB9::D7 only connects to Dcmi!");
+	};
+	template< Peripheral peripheral >
+	struct Fsb { static void connect();
+		static_assert(
+			(peripheral == Peripheral::Sai1),
+			"GpioB9::Fsb only connects to Sai1!");
 	};
 	template< Peripheral peripheral >
 	struct Nss { static void connect();
@@ -266,6 +282,18 @@ struct GpioB9::Ch1<Peripheral::Tim11>
 	}
 };
 template<>
+struct GpioB9::Ch2<Peripheral::Tim2>
+{
+	using Gpio = GpioB9;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Ch2;
+	static constexpr int af = 1;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(1);
+	}
+};
+template<>
 struct GpioB9::Ch4<Peripheral::Tim4>
 {
 	using Gpio = GpioB9;
@@ -299,6 +327,18 @@ struct GpioB9::D7<Peripheral::Dcmi>
 	connect()
 	{
 		setAlternateFunction(13);
+	}
+};
+template<>
+struct GpioB9::Fsb<Peripheral::Sai1>
+{
+	using Gpio = GpioB9;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Fsb;
+	static constexpr int af = 6;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(6);
 	}
 };
 template<>

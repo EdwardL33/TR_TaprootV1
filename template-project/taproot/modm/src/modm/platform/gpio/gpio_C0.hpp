@@ -165,8 +165,8 @@ public:
 	using BitBang = GpioSignal;
 	/// Connect to Adc1 or Adc2 or Adc3
 	using In10 = GpioSignal;
-	/// Connect to Fmc
-	using Sdnwe = GpioSignal;
+	/// Connect to Sai1
+	using Mclkb = GpioSignal;
 	/// Connect to Usbotghs
 	using Ulpistp = GpioSignal;
 	/// @}
@@ -187,10 +187,10 @@ public:
 			"GpioC0::In10 only connects to Adc1 or Adc2 or Adc3!");
 	};
 	template< Peripheral peripheral >
-	struct Sdnwe { static void connect();
+	struct Mclkb { static void connect();
 		static_assert(
-			(peripheral == Peripheral::Fmc),
-			"GpioC0::Sdnwe only connects to Fmc!");
+			(peripheral == Peripheral::Sai1),
+			"GpioC0::Mclkb only connects to Sai1!");
 	};
 	template< Peripheral peripheral >
 	struct Ulpistp { static void connect();
@@ -264,15 +264,15 @@ template<>
 constexpr int8_t
 GpioC0::AdcChannel<Peripheral::Adc3> = 10;
 template<>
-struct GpioC0::Sdnwe<Peripheral::Fmc>
+struct GpioC0::Mclkb<Peripheral::Sai1>
 {
 	using Gpio = GpioC0;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Sdnwe;
-	static constexpr int af = 12;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Mclkb;
+	static constexpr int af = 6;
 	inline static void
 	connect()
 	{
-		setAlternateFunction(12);
+		setAlternateFunction(6);
 	}
 };
 template<>

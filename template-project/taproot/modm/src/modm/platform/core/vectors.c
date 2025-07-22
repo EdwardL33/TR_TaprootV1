@@ -88,8 +88,6 @@ void DMA2_Stream1_IRQHandler(void)				__attribute__((weak, alias("Undefined_Hand
 void DMA2_Stream2_IRQHandler(void)				__attribute__((weak, alias("Undefined_Handler")));
 void DMA2_Stream3_IRQHandler(void)				__attribute__((weak, alias("Undefined_Handler")));
 void DMA2_Stream4_IRQHandler(void)				__attribute__((weak, alias("Undefined_Handler")));
-void ETH_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
-void ETH_WKUP_IRQHandler(void)					__attribute__((weak, alias("Undefined_Handler")));
 void CAN2_TX_IRQHandler(void)					__attribute__((weak, alias("Undefined_Handler")));
 void CAN2_RX0_IRQHandler(void)					__attribute__((weak, alias("Undefined_Handler")));
 void CAN2_RX1_IRQHandler(void)					__attribute__((weak, alias("Undefined_Handler")));
@@ -106,15 +104,15 @@ void OTG_HS_EP1_IN_IRQHandler(void)				__attribute__((weak, alias("Undefined_Han
 void OTG_HS_WKUP_IRQHandler(void)				__attribute__((weak, alias("Undefined_Handler")));
 void OTG_HS_IRQHandler(void)					__attribute__((weak, alias("Undefined_Handler")));
 void DCMI_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
-void HASH_RNG_IRQHandler(void)					__attribute__((weak, alias("Undefined_Handler")));
 void FPU_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
-void UART7_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
-void UART8_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
 void SPI4_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
-void SPI5_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
-void SPI6_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
 void SAI1_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
-void DMA2D_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
+void SAI2_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
+void QUADSPI_IRQHandler(void)					__attribute__((weak, alias("Undefined_Handler")));
+void CEC_IRQHandler(void)						__attribute__((weak, alias("Undefined_Handler")));
+void SPDIF_RX_IRQHandler(void)					__attribute__((weak, alias("Undefined_Handler")));
+void FMPI2C1_EV_IRQHandler(void)				__attribute__((weak, alias("Undefined_Handler")));
+void FMPI2C1_ER_IRQHandler(void)				__attribute__((weak, alias("Undefined_Handler")));
 // ----------------------------------------------------------------------------
 typedef void (* const FunctionPointer)(void);
 
@@ -203,8 +201,8 @@ FunctionPointer vectorsRom[] =
 	DMA2_Stream2_IRQHandler,				//  58
 	DMA2_Stream3_IRQHandler,				//  59
 	DMA2_Stream4_IRQHandler,				//  60
-	ETH_IRQHandler,							//  61
-	ETH_WKUP_IRQHandler,					//  62
+	Undefined_Handler,						//  61
+	Undefined_Handler,						//  62
 	CAN2_TX_IRQHandler,						//  63
 	CAN2_RX0_IRQHandler,					//  64
 	CAN2_RX1_IRQHandler,					//  65
@@ -222,17 +220,23 @@ FunctionPointer vectorsRom[] =
 	OTG_HS_IRQHandler,						//  77
 	DCMI_IRQHandler,						//  78
 	Undefined_Handler,						//  79
-	HASH_RNG_IRQHandler,					//  80
+	Undefined_Handler,						//  80
 	FPU_IRQHandler,							//  81
-	UART7_IRQHandler,						//  82
-	UART8_IRQHandler,						//  83
+	Undefined_Handler,						//  82
+	Undefined_Handler,						//  83
 	SPI4_IRQHandler,						//  84
-	SPI5_IRQHandler,						//  85
-	SPI6_IRQHandler,						//  86
+	Undefined_Handler,						//  85
+	Undefined_Handler,						//  86
 	SAI1_IRQHandler,						//  87
 	Undefined_Handler,						//  88
 	Undefined_Handler,						//  89
-	DMA2D_IRQHandler,						//  90
+	Undefined_Handler,						//  90
+	SAI2_IRQHandler,						//  91
+	QUADSPI_IRQHandler,						//  92
+	CEC_IRQHandler,							//  93
+	SPDIF_RX_IRQHandler,					//  94
+	FMPI2C1_EV_IRQHandler,					//  95
+	FMPI2C1_ER_IRQHandler,					//  96
 };
 // ----------------------------------------------------------------------------
 // Ignore redeclaration of interrupt handlers in vendor headers

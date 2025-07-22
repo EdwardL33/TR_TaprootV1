@@ -163,12 +163,12 @@ public:
 	/// @{
 	/// Connect to any software peripheral
 	using BitBang = GpioSignal;
+	/// Connect to Quadspi
+	using Bk2ncs = GpioSignal;
 	/// Connect to Sdio
 	using D3 = GpioSignal;
 	/// Connect to Dcmi
 	using D4 = GpioSignal;
-	/// Connect to I2s3
-	using Extsd = GpioSignal;
 	/// Connect to Spi3
 	using Miso = GpioSignal;
 	/// Connect to Usart3 or Uart4
@@ -183,6 +183,12 @@ public:
 			"GpioC11::BitBang only connects to software drivers!");
 	};
 	template< Peripheral peripheral >
+	struct Bk2ncs { static void connect();
+		static_assert(
+			(peripheral == Peripheral::Quadspi),
+			"GpioC11::Bk2ncs only connects to Quadspi!");
+	};
+	template< Peripheral peripheral >
 	struct D3 { static void connect();
 		static_assert(
 			(peripheral == Peripheral::Sdio),
@@ -193,12 +199,6 @@ public:
 		static_assert(
 			(peripheral == Peripheral::Dcmi),
 			"GpioC11::D4 only connects to Dcmi!");
-	};
-	template< Peripheral peripheral >
-	struct Extsd { static void connect();
-		static_assert(
-			(peripheral == Peripheral::I2s3),
-			"GpioC11::Extsd only connects to I2s3!");
 	};
 	template< Peripheral peripheral >
 	struct Miso { static void connect();
@@ -231,6 +231,18 @@ struct GpioC11::BitBang<Peripheral::BitBang>
 	inline static void connect() {}
 };
 template<>
+struct GpioC11::Bk2ncs<Peripheral::Quadspi>
+{
+	using Gpio = GpioC11;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Bk2ncs;
+	static constexpr int af = 9;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(9);
+	}
+};
+template<>
 struct GpioC11::D3<Peripheral::Sdio>
 {
 	using Gpio = GpioC11;
@@ -252,18 +264,6 @@ struct GpioC11::D4<Peripheral::Dcmi>
 	connect()
 	{
 		setAlternateFunction(13);
-	}
-};
-template<>
-struct GpioC11::Extsd<Peripheral::I2s3>
-{
-	using Gpio = GpioC11;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Extsd;
-	static constexpr int af = 5;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(5);
 	}
 };
 template<>

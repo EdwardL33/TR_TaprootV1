@@ -173,10 +173,8 @@ public:
 	using In7 = GpioSignal;
 	/// Connect to Spi1
 	using Mosi = GpioSignal;
-	/// Connect to Eth
-	using Rcccrsdv = GpioSignal;
-	/// Connect to Eth
-	using Rxdv = GpioSignal;
+	/// Connect to I2s1
+	using Sd = GpioSignal;
 	/// @}
 #endif
 	/// @cond
@@ -219,16 +217,10 @@ public:
 			"GpioA7::Mosi only connects to Spi1!");
 	};
 	template< Peripheral peripheral >
-	struct Rcccrsdv { static void connect();
+	struct Sd { static void connect();
 		static_assert(
-			(peripheral == Peripheral::Eth),
-			"GpioA7::Rcccrsdv only connects to Eth!");
-	};
-	template< Peripheral peripheral >
-	struct Rxdv { static void connect();
-		static_assert(
-			(peripheral == Peripheral::Eth),
-			"GpioA7::Rxdv only connects to Eth!");
+			(peripheral == Peripheral::I2s1),
+			"GpioA7::Sd only connects to I2s1!");
 	};
 	/// @endcond
 private:
@@ -340,27 +332,15 @@ struct GpioA7::Mosi<Peripheral::Spi1>
 	}
 };
 template<>
-struct GpioA7::Rcccrsdv<Peripheral::Eth>
+struct GpioA7::Sd<Peripheral::I2s1>
 {
 	using Gpio = GpioA7;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Rcccrsdv;
-	static constexpr int af = 11;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Sd;
+	static constexpr int af = 5;
 	inline static void
 	connect()
 	{
-		setAlternateFunction(11);
-	}
-};
-template<>
-struct GpioA7::Rxdv<Peripheral::Eth>
-{
-	using Gpio = GpioA7;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Rxdv;
-	static constexpr int af = 11;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(11);
+		setAlternateFunction(5);
 	}
 };
 /// @endcond

@@ -163,18 +163,16 @@ public:
 	/// @{
 	/// Connect to any software peripheral
 	using BitBang = GpioSignal;
+	/// Connect to Quadspi
+	using Bk1io3 = GpioSignal;
 	/// Connect to Tim2 or Tim5
 	using Ch2 = GpioSignal;
 	/// Connect to Adc1 or Adc2 or Adc3
 	using In1 = GpioSignal;
-	/// Connect to Eth
-	using Refclk = GpioSignal;
 	/// Connect to Usart2
 	using Rts = GpioSignal;
 	/// Connect to Uart4
 	using Rx = GpioSignal;
-	/// Connect to Eth
-	using Rxclk = GpioSignal;
 	/// @}
 #endif
 	/// @cond
@@ -183,6 +181,12 @@ public:
 		static_assert(
 			(peripheral == Peripheral::BitBang),
 			"GpioA1::BitBang only connects to software drivers!");
+	};
+	template< Peripheral peripheral >
+	struct Bk1io3 { static void connect();
+		static_assert(
+			(peripheral == Peripheral::Quadspi),
+			"GpioA1::Bk1io3 only connects to Quadspi!");
 	};
 	template< Peripheral peripheral >
 	struct Ch2 { static void connect();
@@ -200,12 +204,6 @@ public:
 			"GpioA1::In1 only connects to Adc1 or Adc2 or Adc3!");
 	};
 	template< Peripheral peripheral >
-	struct Refclk { static void connect();
-		static_assert(
-			(peripheral == Peripheral::Eth),
-			"GpioA1::Refclk only connects to Eth!");
-	};
-	template< Peripheral peripheral >
 	struct Rts { static void connect();
 		static_assert(
 			(peripheral == Peripheral::Usart2),
@@ -216,12 +214,6 @@ public:
 		static_assert(
 			(peripheral == Peripheral::Uart4),
 			"GpioA1::Rx only connects to Uart4!");
-	};
-	template< Peripheral peripheral >
-	struct Rxclk { static void connect();
-		static_assert(
-			(peripheral == Peripheral::Eth),
-			"GpioA1::Rxclk only connects to Eth!");
 	};
 	/// @endcond
 private:
@@ -239,6 +231,18 @@ struct GpioA1::BitBang<Peripheral::BitBang>
 	static constexpr Gpio::Signal Signal = Gpio::Signal::BitBang;
 	static constexpr int af = -1;
 	inline static void connect() {}
+};
+template<>
+struct GpioA1::Bk1io3<Peripheral::Quadspi>
+{
+	using Gpio = GpioA1;
+	static constexpr Gpio::Signal Signal = Gpio::Signal::Bk1io3;
+	static constexpr int af = 9;
+	inline static void
+	connect()
+	{
+		setAlternateFunction(9);
+	}
 };
 template<>
 struct GpioA1::Ch2<Peripheral::Tim2>
@@ -313,18 +317,6 @@ template<>
 constexpr int8_t
 GpioA1::AdcChannel<Peripheral::Adc3> = 1;
 template<>
-struct GpioA1::Refclk<Peripheral::Eth>
-{
-	using Gpio = GpioA1;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Refclk;
-	static constexpr int af = 11;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(11);
-	}
-};
-template<>
 struct GpioA1::Rts<Peripheral::Usart2>
 {
 	using Gpio = GpioA1;
@@ -346,18 +338,6 @@ struct GpioA1::Rx<Peripheral::Uart4>
 	connect()
 	{
 		setAlternateFunction(8);
-	}
-};
-template<>
-struct GpioA1::Rxclk<Peripheral::Eth>
-{
-	using Gpio = GpioA1;
-	static constexpr Gpio::Signal Signal = Gpio::Signal::Rxclk;
-	static constexpr int af = 11;
-	inline static void
-	connect()
-	{
-		setAlternateFunction(11);
 	}
 };
 /// @endcond
