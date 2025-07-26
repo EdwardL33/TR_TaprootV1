@@ -50,6 +50,9 @@ public:
     enum LedPin
     {
         Green,  // LD2 on PA5
+        A,
+        B,
+        C
     };
 
     /**

@@ -51,6 +51,17 @@ void Leds::set(Leds::LedPin pin, bool isSet)
         case Leds::LedPin::Green:
             LedD13::set(isSet);  // LD2 on PA5/D13
             break;
+
+        case Leds::LedPin::A:
+            LED1::set(isSet);
+            break;
+        
+        case Leds::LedPin::B:
+            LED2::set(isSet);
+            break;
+
+        case Leds::LedPin::C:
+            LED3::set(isSet);
     }
 #endif
 }

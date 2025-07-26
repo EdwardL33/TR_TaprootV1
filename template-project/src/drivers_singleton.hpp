@@ -33,8 +33,8 @@ namespace src
  *      should be calling this function from -- `main.cpp` and `*_control.cpp`, either to
  *      run I/O stuff and to add a Drivers pointer to an instance of a Subsystem or Command.
  */
-src::Drivers *DoNotUse_getDrivers();
-using driversFunc = src::Drivers *(*)();
+Drivers *DoNotUse_getDrivers();
+using driversFunc = Drivers *(*)();
 }  // namespace src
 
 #endif  // DRIVERS_SINGLETON_HPP_
