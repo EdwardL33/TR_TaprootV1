@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_
-#define HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_
+#ifndef CHASSIS_SUBSYSTEM_HPP_
+#define CHASSIS_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/extended_kalman.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
@@ -30,8 +30,12 @@
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
+#include "../constants/chassis_constants.hpp"
+#include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
+
+#include "wheel.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -39,17 +43,10 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
-namespace TRsrc
+namespace aruwsrc
 {
 namespace chassis
 {
-
-static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
-static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
-static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
-static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-
 /**
  * Abstract subsystem for a holonomic chassis
  *
@@ -58,11 +55,12 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
  * coordinate is to the left of the robot, and positive z is up. Also, the chassis rotation is
  * positive when rotating counterclockwise around the z axis.
  */
-class HolonomicChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
+class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
-    HolonomicChassisSubsystem(
-        tap::Drivers* drivers);
+    ChassisSubsystem(
+        tap::Drivers* drivers,
+        std::vector<Wheel>* wheels);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -74,36 +72,26 @@ public:
         R = 2,
     };
 
-    static inline float getMaxWheelSpeed(bool refSerialOnline, float chassisPowerLimit)
+    static inline float getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
     {
         if (!refSerialOnline)
         {
-            chassisPowerLimit = 0;
+            chassisPower = 0;
         }
 
         // only re-interpolate when needed (since this function is called a lot and the chassis
-        // power limit rarely changes, this helps cut down on unnecessary array
-        // searching/interpolation)
-        if (lastComputedMaxWheelSpeed.first != (int)chassisPowerLimit)
+        // power rarely changes, this helps cut down on unnecessary array searching/interpolation)
+        if (lastComputedMaxWheelSpeed.first != chassisPower)
         {
-            lastComputedMaxWheelSpeed.first = (int)chassisPowerLimit;
+            lastComputedMaxWheelSpeed.first = chassisPower;
             lastComputedMaxWheelSpeed.second =
-                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPowerLimit);
+                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPower);
         }
 
         return lastComputedMaxWheelSpeed.second;
     }
 
-    static inline float getChassisPowerLimit(tap::Drivers* drivers)
-    {
-        if (capacitorBank != nullptr && capacitorBank->isSprinting())
-        {
-            return capacitorBank->getMaximumOutputCurrent() *
-                   can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
-        }
-
-        return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
-    }
+    inline int getNumChassisWheels() const { return wheels.size(); }
 
     /**
      * Updates the desired wheel RPM based on the passed in x, y, and r components of
@@ -111,20 +99,32 @@ public:
      * system).
      *
      * @param[in] x The desired velocity of the wheels to move in the x direction.
-     *      So if x=1000, the chassis algorithm will attempt to apply 1000 RPM to motors
+     *      So if x=10, the chassis algorithm will attempt to apply 10 m/s to motors
      *      in order to move the chassis forward.
      * @param[in] y The desired velocity of the wheels to move in the y direction.
      *      See x param for further description.
      * @param[in] r The desired velocity of the wheels to rotate the chassis.
      *      See x param for further description.
      */
-    virtual void setDesiredOutput(float x, float y, float r) = 0;
+    void setDesiredOutput(float x, float y, float r);
+
+    void initialize();
+
+    void refresh();
+
+    void refreshSafeDisconnect() { setZeroRPM(); }
 
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
      * chassis state information like desired rotation.
      */
-    virtual void setZeroRPM() = 0;
+    inline void setZeroRPM()
+    {
+        for (int i = 0; i < getNumChassisWheels(); i++)
+        {
+            wheels[i].executeWheelVelocity(0.0, 0.0);
+        }
+    }
 
     /**
      * Run chassis rotation PID on some actual turret angle offset.
@@ -157,36 +157,42 @@ public:
      */
     virtual modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override = 0;
 
+    /**
+     * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. This is the desired velocity calculated before any
+     *      sort of limiting occurs (other than base max RPM limiting). Units: m/s
+     * @note Equations slightly modified from this paper:
+     *      https://www.hindawi.com/journals/js/2015/347379/.
+     */
+
     const char* getName() const override { return "Chassis"; }
 
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
-    static can::capbank::CapacitorBank* capacitorBank;
 
     float desiredRotation = 0;
 
+    std::vector<Wheel>& wheels;
+
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
 
-    CapBankPowerLimiter chassisPowerLimiter;
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor;
+
+    tap::algorithms::SmoothPid chasisSpeedRotationPID;
+
+    tap::control::chassis::PowerLimiter chassisPowerLimiter;
 
     virtual void limitChassisPower() = 0;
 
-    /**
-     * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
-     */
-    inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
-    {
-        static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
-        return mat * ratio;
-    }
-
-    virtual float mpsToRpm(float mps) const = 0;
-
-};  // class HolonomicChassisSubsystem
+private:
+    double prevTime = 0.0;
+    modm::Pair<float, float> desiredWheelVel;
+    float tempMax = 0;
+};  // class ChassisSubsystem
 
 }  // namespace chassis
 
 }  // namespace aruwsrc
 
-#endif  // HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_
+#endif  // CHASSIS_SUBSYSTEM_HPP_
